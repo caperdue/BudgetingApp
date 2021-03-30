@@ -10,17 +10,14 @@
           <td align="right">Password</td>
           <td align="left"><input type="text" v-model="userPassword" /></td>
         </tr>
-        <tr>
-          <td></td>
-          <button :disabled="noInput" @click-prevent="createAccount">
-            Sign Up
-          </button>
-          <button :disabled="noInput" @click-prevent="authenticate">
-            Sign In
-          </button>
-        </tr>
       </table>
     </form>
+    <button :disabled="noInput" @click="createAccount">
+      Sign Up
+    </button>
+    <button :disabled="noInput" @click="authenticate">
+      Sign In
+    </button>
     <div>
       {{ message }}
     </div>
@@ -28,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Prop } from "vue-property-decorator";
 import { FirebaseFirestore } from "@firebase/firestore-types";
 import { FirebaseAuth } from "@firebase/auth-types";
 
@@ -37,8 +34,8 @@ export default class UserLogin extends Vue {
   readonly $router;
   readonly $appAuth!: FirebaseAuth;
   readonly $appDB!: FirebaseFirestore;
-  private userEmail = ""
-  private userPassword = ""
+  private userEmail = "";
+  private userPassword = "";
   private message = "";
 
   get noInput(): boolean {
@@ -52,7 +49,6 @@ export default class UserLogin extends Vue {
     }, 5000);
   }
   createAccount(): void {
-    console.log("RAN")
     this.$appAuth
       .createUserWithEmailAndPassword(this.userEmail, this.userPassword)
       .then((u) => {

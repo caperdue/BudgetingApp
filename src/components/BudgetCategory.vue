@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Add Expense Category</h1>
+    <router-link to="/expenses" replace>Add Expense Details</router-link>
     <form>
   <table>
     <tr>
@@ -24,7 +24,7 @@
     </tr>
     <tr v-for="(z,pos) in allCategories" :key="pos">
         <td>{{z.name}}</td>
-        <td>{{z.limit.toFixed(2)}}</td>
+        <td>{{parseInt(z.limit).toFixed(2)}}</td>
     </tr>
     </tbody>
 </table>
@@ -34,26 +34,31 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import {FirebaseFirestore} from "@firebase/firestore-types"
+import { Component,  Vue, Prop} from 'vue-property-decorator';
+import { FirebaseFirestore } from "@firebase/firestore-types"
 import  { QuerySnapshot, QueryDocumentSnapshot } from '@firebase/firestore-types'
+import { FirebaseAuth } from "@firebase/auth-types";
 
 @Component
 export default class BudgetCategory extends Vue {
 readonly $appDB!: FirebaseFirestore;
+readonly $appAuth!: FirebaseAuth;
+private uid = "none"
 @Prop() private budgetLimit!: number;
 @Prop() private budgetCategory!: string;
 private allCategories: any[] = [];
 
 saveCategory(): void {
+  
  this.$appDB
-    .collection("users/me/categories")
+    .collection(`users/${this.uid}/categories`)
     .add({name: this.budgetCategory, monthlyLimit: this.budgetLimit})
 }
 
 mounted(): void {
+  this.uid = this.$appAuth.currentUser?.uid ?? "none";
   this.$appDB
-    .collection("users/me/categories")
+    .collection(`users/${this.uid}/categories`)
     .orderBy("name")       // Sort by category name
     .onSnapshot((qs: QuerySnapshot) => {
       this.allCategories.splice(0);  // remove old data
@@ -62,7 +67,7 @@ mounted(): void {
           const catData = qds.data();
           this.allCategories.push({
             name: catData.name,
-            limit: catData.monthlyLimit,
+            limit: parseInt(catData.monthlyLimit),
           
           });
         }
